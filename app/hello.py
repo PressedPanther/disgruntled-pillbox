@@ -1,5 +1,5 @@
 from flask import Flask, render_template
-app = Flask(__name__,static_folder=os.path.abspath(".../build"),static_url_path='/')
+app = Flask(__name__)
 
 @app.route('/', defaults={'path':''})
 def home():
