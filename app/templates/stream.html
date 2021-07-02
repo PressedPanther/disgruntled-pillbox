@@ -1,0 +1,13 @@
+{% extends "layout.html" %}
+        {% block content %}
+        <div class ="stream">
+        <h1>
+            Live Feed
+        </h1>
+        <p>Streaming from front-facing camera</p>
+        <video width="1280" height="720" controls>
+            <source src="static/extra-xayah.webm" type="video/webm">
+          Your browser does not support the video tag.
+          </video>
+        <div> 
+        {% endblock %}
