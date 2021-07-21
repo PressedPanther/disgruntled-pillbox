@@ -4,7 +4,7 @@
         <h1>
             Live Feed
         </h1>
-        <p>Streaming from front-facing camera</p>
-        <p><video id="video" src="http://127.0.0.1:8080" autoplay="autoplay" width ="600" height ="400" controls></video></p>
+        <p>Streaming from front-facing camera in grayscale</p>
+        <p><img src= "{{ url_for('video_feed')}}"></p>
         <div> 
         {% endblock %}
