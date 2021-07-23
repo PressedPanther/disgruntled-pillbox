@@ -1,8 +1,8 @@
 from pyimagesearch.motion_detection import singlemotiondetector
 from imutils.video import VideoStream
 from flask import Response
-from flask import Flask
-from flask import render_template
+from flask import Flask,render_template,Response
+from flask_dance.contrib.github import make_github_blueprint, github
 import threading
 import argparse
 import datetime
@@ -15,12 +15,17 @@ lock = threading.Lock()
 
 app = Flask(__name__)
 
-vs = VideoStream (src=0).start()
+#vs = VideoStream(src=0).start()
+vs = cv2.VideoCapture(0, cv2.CAP_DSHOW)
 time.sleep(2.0)
 
 @app.route('/')
 def home():
-    return render_template('home.html')
+    if not github.authorized:
+        return redirect(url_for("github.login"))
+    resp = github.get("/user")
+    assert resp.ok
+    return "You are @{login} on GitHub".format(login=resp.json()["login"]))
 
 @app.route('/',defaults={'path':''})
 @app.route('/<path:path>')
@@ -37,7 +42,7 @@ def stream():
 
 def detect_motion(frameCount):
     global vs, outputFrame, lock
-    md = singlemotiondetector(accumWeight=.01)
+    md = singlemotiondetector(accumWeight=0.1)
     total = 0
     while True:
         frame = vs.read()
@@ -61,7 +66,7 @@ def detect_motion(frameCount):
 
         with lock: 
             outputFrame = frame.copy()
-    
+
 def generate():
         global outputFrame, lock
         while True:
@@ -75,13 +80,14 @@ def generate():
             yield(b'--frame\r\n' b'Content-Type: image/jpeg\r\n\r\n'+ 
                 bytearray(encodedImage) + b'r\n')
 
-@app.route('/video_feed')
+@app.route("/video_feed")
 def video_feed():
-        return Response(generate)(
+        return Response(generate(),
         mimetype= "multipart/x-mixed-replace; boundary=frame")
-if __name__ == 'main':
+
+if __name__ == '__main__':
     ap = argparse.ArgumentParser()
-    ap.add_Argument("-i", "--ip", type=str, required=True,
+    ap.add_argument("-i", "--ip", type=str, required=True,
         help="ip address of the device")
     ap.add_argument("-o", "--port", type=int,required=True,
         help= "ephemeral port number of the server (1024 to 65535)")
@@ -96,7 +102,7 @@ if __name__ == 'main':
     t.start()
     app.run(host=args["ip"], port=args["port"], debug=True, threaded=True,use_reloader=False)
 
-vs.stop()
+#if __name__ == '__main__':
+ #   app.run(debug=True)
 
-##if __name__ == '__main__':
-  ##  app.run(debug=True)
+#vs.stop()

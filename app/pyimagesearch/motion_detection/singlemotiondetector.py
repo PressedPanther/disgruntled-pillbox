@@ -3,7 +3,7 @@ import imutils
 import cv2
 
 class SingleMotionDetector:
-    def _init_(self, accumWeight=0.5):
+    def __init__(self, accumWeight=0.5):
         self.accumWeight = accumWeight
         self.bg = None
     
