@@ -2,31 +2,39 @@ from pyimagesearch.motion_detection import singlemotiondetector
 from imutils.video import VideoStream
 from flask import Response
 from flask import Flask,render_template,Response
-from flask_dance.contrib.github import make_github_blueprint, github
+#from flask_dance.contrib.github import make_github_blueprint, github
+#from werkzeug.contrib.fixers import ProxyFix
+from dotenv import load_dotenv
 import threading
 import argparse
 import datetime
 import imutils
 import time
 import cv2
-
+#import shh.env
 outputFrame = None
 lock = threading.Lock()
-
+load_dotenv()
 app = Flask(__name__)
-
+#app.wsgi_app = ProxyFix(app.wsgi_app)
+#app.secret_key = "supersekrit"
+#blueprint = make_github_blueprint(
+ #   client_id = os.environ.get(client_id),
+  #  client_secret = os.environ.get(client_secret),
+#)
+#app.register_blueprint(blueprint, url_prefix="/login")
 #vs = VideoStream(src=0).start()
 vs = cv2.VideoCapture(0, cv2.CAP_DSHOW)
 time.sleep(2.0)
 
 @app.route('/')
 def home():
-    if not github.authorized:
-        return redirect(url_for("github.login"))
-    resp = github.get("/user")
-    assert resp.ok
-    return "You are @{login} on GitHub".format(login=resp.json()["login"]))
-
+    #if not github.authorized:
+     #   return redirect(url_for("github.login"))
+    #resp = github.get("/user")
+    #assert resp.ok
+    #return "You are @{login} on GitHub".format(login=resp.json()["login"]))
+    return render_template('home.html')
 @app.route('/',defaults={'path':''})
 @app.route('/<path:path>')
 def catch_all(path):
