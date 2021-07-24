@@ -1,7 +1,7 @@
 from pyimagesearch.motion_detection import singlemotiondetector
 from imutils.video import VideoStream
 from flask import Response
-from flask import Flask,render_template,Response
+from flask import (Flask,render_template,Response,request,redirect, session)
 #from flask_dance.contrib.github import make_github_blueprint, github
 #from werkzeug.contrib.fixers import ProxyFix
 from dotenv import load_dotenv
@@ -17,9 +17,21 @@ import cv2
 #lock = threading.Lock()
 load_dotenv()
 app = Flask(__name__)
+app.secret_key = os.getenv("client_secret")
+user = {"username": "abc", "password": "xyz"}
 video = cv2.VideoCapture(0, cv2.CAP_DSHOW)
+@app.route('login',methods = ['POST','GET'])
+def login():
+    if(request.method == 'POST'):
+        username = request.form.get('username')
+        password = request.form.get('password')
+        if username == user['username'] and password == user['password']:
+            session['user'] = username
+            return redirect('/home')
+        return "<h1> Wrong username or password</h1>" 
+    return render_template("login.html")
 #app.wsgi_app = ProxyFix(app.wsgi_app)
-#app.secret_key = "supersekrit"
+
 #blueprint = make_github_blueprint(
  #   client_id = os.environ.get(client_id),
   #  client_secret = os.environ.get(client_secret),
