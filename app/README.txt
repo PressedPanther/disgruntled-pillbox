@@ -9,3 +9,5 @@ https://medium.com/@winnieliang/how-to-run-a-simple-html-css-javascript-applicat
 3.cv related items (parts of hello.py, pyimagesearch)
 https://www.pyimagesearch.com/2019/09/02/opencv-stream-video-to-web-browser-html-page/
 
+4. Login Session
+https://iq.opengenus.org/login-page-in-flask/
