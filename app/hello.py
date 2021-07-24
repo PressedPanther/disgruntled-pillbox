@@ -38,14 +38,6 @@ def login():
 #)
 #app.register_blueprint(blueprint, url_prefix="/login")
 
-
-
-#@app.route('/',defaults={'path':''})
-#@app.route('/<path:path>')
-#def catch_all(path):
-#    return app.send_static_file('home.html')
-
-
 @app.route('/home')
 def home():
     #if not github.authorized:
