@@ -72,6 +72,6 @@ body {
     margin-left: 35px;
   }
   .menu li a {
-    color: #444;
+    color: rgb(255, 255, 255);
     text-decoration: none;
   }
