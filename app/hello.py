@@ -12,10 +12,12 @@ import imutils
 import time
 import cv2
 #import shh.env
-outputFrame = None
-lock = threading.Lock()
+
+#outputFrame = None
+#lock = threading.Lock()
 load_dotenv()
 app = Flask(__name__)
+video = cv2.VideoCapture(0, cv2.CAP_DSHOW)
 #app.wsgi_app = ProxyFix(app.wsgi_app)
 #app.secret_key = "supersekrit"
 #blueprint = make_github_blueprint(
@@ -24,8 +26,8 @@ app = Flask(__name__)
 #)
 #app.register_blueprint(blueprint, url_prefix="/login")
 #vs = VideoStream(src=0).start()
-vs = cv2.VideoCapture(0, cv2.CAP_DSHOW)
-time.sleep(2.0)
+
+#time.sleep(2.0)
 
 @app.route('/')
 def home():
@@ -35,10 +37,10 @@ def home():
     #assert resp.ok
     #return "You are @{login} on GitHub".format(login=resp.json()["login"]))
     return render_template('home.html')
-@app.route('/',defaults={'path':''})
-@app.route('/<path:path>')
-def catch_all(path):
-    return app.send_static_file('home.html')
+#@app.route('/',defaults={'path':''})
+#@app.route('/<path:path>')
+#def catch_all(path):
+#    return app.send_static_file('home.html')
 
 @app.route('/showcase/')
 def showcase():
@@ -48,7 +50,7 @@ def showcase():
 def stream():
     return render_template('stream.html')
 
-def detect_motion(frameCount):
+#def detect_motion(frameCount):
     global vs, outputFrame, lock
     md = singlemotiondetector(accumWeight=0.1)
     total = 0
@@ -75,42 +77,49 @@ def detect_motion(frameCount):
         with lock: 
             outputFrame = frame.copy()
 
-def generate():
-        global outputFrame, lock
-        while True:
-            with lock:
-                if outputFrame is None:
-                    continue
-                (flag, encodedImage) = cv2.imencode(".jpg", outputFrame)
-
-                if not flag:
-                    continue
-            yield(b'--frame\r\n' b'Content-Type: image/jpeg\r\n\r\n'+ 
-                bytearray(encodedImage) + b'r\n')
+def gen(video):
+    while True:
+        success, image = video.read()
+        ret, jpeg = cv2.imencode('.jpg', image)
+        frame = jpeg.tobytes()
+        yield (b'--frame\r\n'
+               b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n\r\n')
+#def generate():
+   #     global outputFrame, lock
+    #    while True:
+     #       with lock:
+      #          if outputFrame is None:
+       #             continue
+        #        (flag, encodedImage) = cv2.imencode(".jpg", outputFrame)
+#
+ #               if not flag:
+  #                  continue
+   #          yield(b'--frame\r\n' b'Content-Type: image/jpeg\r\n\r\n'+ 
+    #             bytearray(encodedImage) + b'r\n')
 
 @app.route("/video_feed")
 def video_feed():
-        return Response(generate(),
+        return Response(gen(video),
         mimetype= "multipart/x-mixed-replace; boundary=frame")
 
-if __name__ == '__main__':
-    ap = argparse.ArgumentParser()
-    ap.add_argument("-i", "--ip", type=str, required=True,
-        help="ip address of the device")
-    ap.add_argument("-o", "--port", type=int,required=True,
-        help= "ephemeral port number of the server (1024 to 65535)")
-    ap.add_argument("-f","--frame-count", type=int, default=32,
-        help = "# of frames used to construct the background model")
-    args = vars(ap.parse_args())
-
-    t = threading.Thread(target=detect_motion,args=(
-        args["frame_count"],
-    ))
-    t.daemon = True
-    t.start()
-    app.run(host=args["ip"], port=args["port"], debug=True, threaded=True,use_reloader=False)
-
 #if __name__ == '__main__':
- #   app.run(debug=True)
+ #   ap = argparse.ArgumentParser()
+  #  ap.add_argument("-i", "--ip", type=str, required=True,
+  #      help="ip address of the device")
+  #  ap.add_argument("-o", "--port", type=int,required=True,
+  #      help= "ephemeral port number of the server (1024 to 65535)")
+  #  ap.add_argument("-f","--frame-count", type=int, default=32,
+  #      help = "# of frames used to construct the background model")
+  #  args = vars(ap.parse_args())
+
+   # t = threading.Thread(target=detect_motion,args=(
+   #     args["frame_count"],
+   # ))
+   # t.daemon = True
+   # t.start()
+   # app.run(host=args["ip"], port=args["port"], debug=True, threaded=True,use_reloader=False)
+
+if __name__ == '__main__':
+    app.run(host='127.0.0.1', port=5000,threaded=True)
 
 #vs.stop()
